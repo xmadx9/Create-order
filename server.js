@@ -6,41 +6,48 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ Environment variables (use .env in real projects)
-const SHOPIFY_API_KEY = '05af89d61893f7f6e9c59a9bd2486fcc';
-const SHOPIFY_API_SECRET = '8fc0e7b4d183b748398ed7c32e93d911';
+// ✅ Shopify credentials (يفضل تستعمل .env فـ production)
 const SHOPIFY_STORE = 'privilegiashop.ma';
 const ACCESS_TOKEN = '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';
+const FIXED_VARIANT_ID = 44587629740320; // 🟢 بدلوه على حساب المنتج
 
-// ✅ Variant ثابت (اختارو على حساب المنتج لي كتبيع)
-const FIXED_VARIANT_ID = 44587629740320; // ← عوضو بـ ID ديال variant المناسب
-
+// ✅ Middleware
 app.use(cors({
   origin: ['https://privilegiashop.ma', 'https://www.privilegiashop.ma'],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type']
 }));
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// 🛒 Endpoint to create real order in Shopify
+// ✅ API Endpoint
 app.post('/create-order', async (req, res) => {
-  const { nom, tele, ville, address, quantity, email } = req.body;
+  const {
+    nom,
+    tele,
+    ville,
+    address,
+    quantity,
+    email,
+    productTitle,
+    productPrice,
+    productId,
+    orderDate
+  } = req.body;
 
   try {
     const orderData = {
       order: {
         line_items: [
           {
-            variant_id: FIXED_VARIANT_ID, // ✅ حذفنا req.body.variantId واستعملنا قيمة ثابتة
+            variant_id: FIXED_VARIANT_ID,
             quantity: parseInt(quantity || 1)
           }
         ],
         customer: {
           first_name: nom,
           phone: tele,
-          email: `${tele}@noemail.com`,
+          email: email || `${tele}@noemail.com`,
           tags: "easysell_cod_form"
         },
         shipping_address: {
@@ -49,12 +56,23 @@ app.post('/create-order', async (req, res) => {
           first_name: nom,
           phone: tele
         },
-        tags: "easysell_cod_form",
         financial_status: 'pending',
         fulfillment_status: null,
+        tags: "easysell_cod_form",
         send_receipt: false,
         send_fulfillment_receipt: false,
-        source_name: 'web'
+        source_name: 'web',
+
+        // ✅ 📝 معلومات إضافية فـ note
+        note: `
+📦 Produit: ${productTitle}
+💰 Prix: ${productPrice} DH
+📄 ID Produit: ${productId}
+📅 Date: ${orderDate}
+📞 Client: ${nom} - ${tele}
+🏙️ Ville: ${ville}
+📍 Adresse: ${address}
+        `.trim()
       }
     };
 
