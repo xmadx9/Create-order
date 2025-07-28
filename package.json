@@ -1,0 +1,23 @@
+{
+  "name": "shopify-order-backend",
+  "version": "1.0.0",
+  "description": "Backend for creating Shopify orders via Admin API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "shopify",
+    "order",
+    "express",
+    "api"
+  ],
+  "author": "Privilegia",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}
