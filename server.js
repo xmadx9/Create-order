@@ -1,5 +1,6 @@
 // 📦 File: server.js
 const express = require('express');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const app = express();
@@ -11,6 +12,11 @@ const SHOPIFY_API_SECRET = '8fc0e7b4d183b748398ed7c32e93d911';
 const SHOPIFY_STORE = 'privilegiashop.ma';
 const ACCESS_TOKEN = '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';
 
+app.use(cors({
+  origin: ['https://privilegiashop.ma', 'https://www.privilegiashop.ma'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type']
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
