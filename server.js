@@ -27,30 +27,34 @@ app.post('/create-order', async (req, res) => {
 
   try {
     const orderData = {
-      order: {
-        line_items: [
-          {
-            variant_id: variantId,
-            quantity: parseInt(quantity || 1)
-          }
-        ],
-        customer: {
-          first_name: nom,
-          phone: tele,
-          email: email || `${tele}@noemail.com` // 🟢 إضافة email ضرورية
-        },
-        shipping_address: {
-          address1: address,
-          city: ville,
-          first_name: nom,
-          phone: tele
-        },
-        financial_status: 'paid', // ✅ باش يتسجل مباشرة فـ Orders
-        fulfillment_status: 'unfulfilled', // ✅ ضروري باش يبان فـ لائحة الطلبات
-        send_receipt: false,
-        send_fulfillment_receipt: false
+  order: {
+    line_items: [
+      {
+        variant_id: parseInt(variantId),
+        quantity: parseInt(quantity || 1)
       }
-    };
+    ],
+    customer: {
+      first_name: nom,
+      phone: tele,
+      email: `${tele}@noemail.com`,
+      tags: "easysell_cod_form"
+    },
+    shipping_address: {
+      address1: address,
+      city: ville,
+      first_name: nom,
+      phone: tele
+    },
+    tags: "easysell_cod_form",
+    financial_status: 'pending',
+    fulfillment_status: null,
+    send_receipt: false,
+    send_fulfillment_receipt: false,
+    source_name: 'web'
+  }
+};
+
 
     const response = await axios.post(
       `https://${SHOPIFY_STORE}/admin/api/2023-07/orders.json`,
