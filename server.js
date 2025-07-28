@@ -12,6 +12,9 @@ const SHOPIFY_API_SECRET = '8fc0e7b4d183b748398ed7c32e93d911';
 const SHOPIFY_STORE = 'privilegiashop.ma';
 const ACCESS_TOKEN = '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';
 
+// ✅ Variant ثابت (اختارو على حساب المنتج لي كتبيع)
+const FIXED_VARIANT_ID = 44587629740320; // ← عوضو بـ ID ديال variant المناسب
+
 app.use(cors({
   origin: ['https://privilegiashop.ma', 'https://www.privilegiashop.ma'],
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -23,38 +26,37 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // 🛒 Endpoint to create real order in Shopify
 app.post('/create-order', async (req, res) => {
-  const { nom, tele, ville, address, quantity, variantId, email } = req.body;
+  const { nom, tele, ville, address, quantity, email } = req.body;
 
   try {
     const orderData = {
-  order: {
-    line_items: [
-      {
-        variant_id: parseInt(variantId),
-        quantity: parseInt(quantity || 1)
+      order: {
+        line_items: [
+          {
+            variant_id: FIXED_VARIANT_ID, // ✅ حذفنا req.body.variantId واستعملنا قيمة ثابتة
+            quantity: parseInt(quantity || 1)
+          }
+        ],
+        customer: {
+          first_name: nom,
+          phone: tele,
+          email: `${tele}@noemail.com`,
+          tags: "easysell_cod_form"
+        },
+        shipping_address: {
+          address1: address,
+          city: ville,
+          first_name: nom,
+          phone: tele
+        },
+        tags: "easysell_cod_form",
+        financial_status: 'pending',
+        fulfillment_status: null,
+        send_receipt: false,
+        send_fulfillment_receipt: false,
+        source_name: 'web'
       }
-    ],
-    customer: {
-      first_name: nom,
-      phone: tele,
-      email: `${tele}@noemail.com`,
-      tags: "easysell_cod_form"
-    },
-    shipping_address: {
-      address1: address,
-      city: ville,
-      first_name: nom,
-      phone: tele
-    },
-    tags: "easysell_cod_form",
-    financial_status: 'pending',
-    fulfillment_status: null,
-    send_receipt: false,
-    send_fulfillment_receipt: false,
-    source_name: 'web'
-  }
-};
-
+    };
 
     const response = await axios.post(
       `https://${SHOPIFY_STORE}/admin/api/2023-07/orders.json`,
