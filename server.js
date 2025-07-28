@@ -6,7 +6,7 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ Environment variables (you should use .env file in production)
+// ✅ Environment variables (use .env in real projects)
 const SHOPIFY_API_KEY = '05af89d61893f7f6e9c59a9bd2486fcc';
 const SHOPIFY_API_SECRET = '8fc0e7b4d183b748398ed7c32e93d911';
 const SHOPIFY_STORE = 'privilegiashop.ma';
@@ -17,12 +17,13 @@ app.use(cors({
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type']
 }));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // 🛒 Endpoint to create real order in Shopify
 app.post('/create-order', async (req, res) => {
-  const { nom, tele, ville, address, quantity, variantId } = req.body;
+  const { nom, tele, ville, address, quantity, variantId, email } = req.body;
 
   try {
     const orderData = {
@@ -35,7 +36,8 @@ app.post('/create-order', async (req, res) => {
         ],
         customer: {
           first_name: nom,
-          phone: tele
+          phone: tele,
+          email: email || `${tele}@noemail.com` // 🟢 إضافة email ضرورية
         },
         shipping_address: {
           address1: address,
@@ -43,7 +45,10 @@ app.post('/create-order', async (req, res) => {
           first_name: nom,
           phone: tele
         },
-        financial_status: 'pending'
+        financial_status: 'paid', // ✅ باش يتسجل مباشرة فـ Orders
+        fulfillment_status: 'unfulfilled', // ✅ ضروري باش يبان فـ لائحة الطلبات
+        send_receipt: false,
+        send_fulfillment_receipt: false
       }
     };
 
